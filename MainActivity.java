@@ -1,53 +1,75 @@
-package com.example.viikko_7;
+package com.example.viikko_7_5;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
+
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView textOutput;
-    String text;
-
+    Context context = null;
+    String fileName;
     EditText textInput;
+    EditText fName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        textOutput = (TextView) findViewById(R.id.textView);
+        context = MainActivity.this;
+        fName = (EditText) findViewById(R.id.fName);
         textInput = (EditText) findViewById(R.id.textInput);
 
-        //this.printWorld();
-        textInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
-
-            //Tämä kopioi tekstin syöttökentästä TextView kenttään aina kun kenttään tehdään muutoksia
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                text = textInput.getText().toString();
-                textOutput.setText(text);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
     }
-    public void printWorld(View v){
-        System.out.println("Hello World!");
-        //text = textInput.getText().toString();
-        //textOutput.setText(text);
+
+    public void readFile(View v){
+        try{
+            fileName = fName.getText().toString();
+            InputStream ins = context.openFileInput(fileName);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(ins));
+            String s = "";
+            StringBuilder sb = new StringBuilder();
+
+            while ((s=br.readLine()) != null){
+                sb.append(s + "\n");        //Luetaan rivit tiedostosta ja lisätään ne muuttujaan 'sb'
+            }
+            textInput.setText(sb);
+            ins.close();
+        }catch (IOException e){
+            Log.e("IOException", "Virhe syötteessä");
+        }finally{
+            System.out.println("LUETTU");
+        }
+
+
+
+    }
+
+    public void writeFile(View v){
+        try{
+            fileName = fName.getText().toString();
+            OutputStreamWriter osw = new OutputStreamWriter(context.openFileOutput(fileName, Context.MODE_PRIVATE));
+
+            String s = textInput.getText().toString();
+            osw.write(s);
+            osw.close();
+        }catch (IOException e){
+            Log.e("IOException", "Virhe syötteessä");
+        }finally{
+            System.out.println("KIRJOITETTU");
+        }
     }
 }
